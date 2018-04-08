@@ -16,15 +16,13 @@ namespace RecordManagementAPI.Controllers
         [HttpGet]
         public string Get()
         {
-            var result = new Record();
             using (var db = new LiteDatabase(@"MyData.db"))
             {
                 var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
                 return  JsonConvert.SerializeObject(records.FindAll());
             }
-            return "";
         }
-
+                                                                                                                          
         
 
         // GET api/values/5
@@ -36,7 +34,30 @@ namespace RecordManagementAPI.Controllers
                 var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
                 return JsonConvert.SerializeObject(records.FindOne(x => x.Id == id));
             }
-            return "";
+        }
+
+        // GET api/values/3123123123
+        [HttpGet]
+        [Route("phonenumber/{phoneNumber}")]
+        public string GetByPhoneNumber(string phoneNumber)
+        {
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                return JsonConvert.SerializeObject(records.FindOne(x => x.PhoneNumberPersonal == phoneNumber || x.PhoneNumberProfessional == phoneNumber));
+            }
+        }
+
+        // GET api/values/john.doe@johndoe.com
+        [HttpGet]
+        [Route("email/{email}")]
+        public string GetByEMail(string email)
+        {
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                return JsonConvert.SerializeObject(records.FindOne(x => x.Email == email));
+            }
         }
 
         // POST api/values
@@ -59,9 +80,9 @@ namespace RecordManagementAPI.Controllers
             return CreatedAtRoute("GetRecordById", new { id = item.Id }, item);
         }
 
-        // PUT api/values/5
+        // PUT api/values
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Record item)
+        public IActionResult Put([FromBody] Record item)
         {
             if (item == null)
                 return BadRequest();
