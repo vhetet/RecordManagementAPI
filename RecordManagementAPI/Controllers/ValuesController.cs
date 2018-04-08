@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LiteDB;
 using Microsoft.AspNetCore.Mvc;
+using RecordManagementAPI.Model;
+using Newtonsoft.Json;
 
 namespace RecordManagementAPI.Controllers
 {
@@ -11,34 +14,76 @@ namespace RecordManagementAPI.Controllers
     {
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            return new string[] { "value1", "value2" };
+            var result = new Record();
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                return  JsonConvert.SerializeObject(records.FindAll());
+            }
+            return "";
         }
 
+        
+
         // GET api/values/5
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetRecordById")]
         public string Get(int id)
         {
-            return "value";
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                return JsonConvert.SerializeObject(records.FindOne(x => x.Id == id));
+            }
+            return "";
         }
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string value)
+        public IActionResult Create([FromBody] Record item)
         {
+            if (item == null)
+                return BadRequest();
+            
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+//                if (records.Count() == 0)
+//                    item.Id = 0;
+//                else
+//                    item.Id = records.Max(x => x.Id) + 1;
+                records.Insert(item);
+            }
+
+            return CreatedAtRoute("GetRecordById", new { id = item.Id }, item);
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public IActionResult Put(int id, [FromBody] Record item)
         {
+            if (item == null)
+                return BadRequest();
+
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                records.Update(item);
+            }
+
+            return CreatedAtRoute("GetRecordById", new { id = item.Id }, item);
         }
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                records.Delete(id);
+            }
         }
     }
 }
