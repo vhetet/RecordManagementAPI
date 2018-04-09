@@ -3,3 +3,5 @@ MyData.db
 obj/*
 RecordManagerAPI/obj/*
 RecordManagerAPI.Tests/obj/*
+RecordManagementAPI/bin/*
+RecordManagementAPI.Tests/bin/*
