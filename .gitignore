@@ -1,2 +1,5 @@
 .vs/*
 MyData.db
+obj/*
+RecordManagerAPI/obj/*
+RecordManagerAPI.Tests/obj/*
