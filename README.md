@@ -20,5 +20,15 @@ The point of this project is to experiment with new framework I have not got the
 
 As of now this project is largely incomplete and lacks a lot of element:
 * the is no data validation, as of now it's just assumed that the users will never make mistakes... (I know that is really optimistic :) )
-* it's barely tested
+* it's not tested
 * it has not been deployed anywhere beside my local environment, but I plan to use azure for that. Also the point of using docker waht to make it easy to deploy so I need to look at that in details.
+
+### Other infos
+
+This was developed with the latest update of VS2017 (15.6) and the latest version of docker for windows (18.03.0).
+I also used postman to test the endpoints manually
+
+### resource used
+
+http://www.litedb.org/
+https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-web-api
