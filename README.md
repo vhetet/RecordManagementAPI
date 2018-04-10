@@ -70,6 +70,7 @@ As of now this project is largely incomplete and lacks a lot of element:
 * the is no data validation, as of now it's just assumed that the users will never make mistakes... (I know that is really optimistic :) )
 * it's barely tested
 * it has not been deployed anywhere beside my local environment, but I plan to use azure for that. Also the point of using docker waht to make it easy to deploy so I need to look at that in details.
+* The image download is not working as of now
 
 ### Other infos
 
