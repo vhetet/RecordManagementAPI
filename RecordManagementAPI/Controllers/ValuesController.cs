@@ -32,7 +32,7 @@ namespace RecordManagementAPI.Controllers
             using (var db = new LiteDatabase(@"MyData.db"))
             {
                 var records = db.GetCollection<Record>("records");
-                return JsonConvert.SerializeObject(records.FindById(id)) ?? "Not found";
+                return JsonConvert.SerializeObject(records.FindById(id));
             }
         }
 
@@ -44,7 +44,7 @@ namespace RecordManagementAPI.Controllers
             using (var db = new LiteDatabase(@"MyData.db"))
             {
                 var records = db.GetCollection<Record>("records");
-                return JsonConvert.SerializeObject(records.Find(x => x.PhoneNumberPersonal == phoneNumber || x.PhoneNumberProfessional == phoneNumber)) ?? "Not found";
+                return JsonConvert.SerializeObject(records.Find(x => x.PhoneNumberPersonal == phoneNumber || x.PhoneNumberProfessional == phoneNumber));
             }
         }
 
@@ -56,7 +56,7 @@ namespace RecordManagementAPI.Controllers
             using (var db = new LiteDatabase(@"MyData.db"))
             {
                 var records = db.GetCollection<Record>("records");
-                return JsonConvert.SerializeObject(records.Find(x => x.Email == email)) ?? "Not found";
+                return JsonConvert.SerializeObject(records.Find(x => x.Email == email));
             }
         }
 
