@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RecordManagementAPI.Model;
 using Newtonsoft.Json;
+using FileMode = System.IO.FileMode;
 
 namespace RecordManagementAPI.Controllers
 {
@@ -18,7 +21,7 @@ namespace RecordManagementAPI.Controllers
         {
             using (var db = new LiteDatabase(@"MyData.db"))
             {
-                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                var records = db.GetCollection<Record>("records");
                 return  JsonConvert.SerializeObject(records.FindAll());
             }
         }
@@ -31,8 +34,8 @@ namespace RecordManagementAPI.Controllers
         {
             using (var db = new LiteDatabase(@"MyData.db"))
             {
-                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
-                return JsonConvert.SerializeObject(records.FindOne(x => x.Id == id));
+                var records = db.GetCollection<Record>("records");
+                return JsonConvert.SerializeObject(records.FindById(id));
             }
         }
 
@@ -43,8 +46,8 @@ namespace RecordManagementAPI.Controllers
         {
             using (var db = new LiteDatabase(@"MyData.db"))
             {
-                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
-                return JsonConvert.SerializeObject(records.FindOne(x => x.PhoneNumberPersonal == phoneNumber || x.PhoneNumberProfessional == phoneNumber));
+                var records = db.GetCollection<Record>("records");
+                return JsonConvert.SerializeObject(records.Find(x => x.PhoneNumberPersonal == phoneNumber || x.PhoneNumberProfessional == phoneNumber));
             }
         }
 
@@ -55,8 +58,8 @@ namespace RecordManagementAPI.Controllers
         {
             using (var db = new LiteDatabase(@"MyData.db"))
             {
-                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
-                return JsonConvert.SerializeObject(records.FindOne(x => x.Email == email));
+                var records = db.GetCollection<Record>("records");
+                return JsonConvert.SerializeObject(records.Find(x => x.Email == email));
             }
         }
 
@@ -69,11 +72,7 @@ namespace RecordManagementAPI.Controllers
             
             using (var db = new LiteDatabase(@"MyData.db"))
             {
-                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
-//                if (records.Count() == 0)
-//                    item.Id = 0;
-//                else
-//                    item.Id = records.Max(x => x.Id) + 1;
+                var records = db.GetCollection<Record>("records");
                 records.Insert(item);
             }
 
@@ -89,7 +88,7 @@ namespace RecordManagementAPI.Controllers
 
             using (var db = new LiteDatabase(@"MyData.db"))
             {
-                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                var records = db.GetCollection<Record>("records");
                 records.Update(item);
             }
 
@@ -102,9 +101,88 @@ namespace RecordManagementAPI.Controllers
         {
             using (var db = new LiteDatabase(@"MyData.db"))
             {
-                var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
+                var records = db.GetCollection<Record>("records");
+                db.FileStorage.Delete(id.ToString());
                 records.Delete(id);
             }
         }
+
+        [HttpPost]
+        [Route("image/{id}")]
+        public async Task<IActionResult> Post(IFormFile file, int id)
+        {
+            var filePath = Path.GetTempFileName();
+
+            if (file.Length > 0)
+            {
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                    using (var db = new LiteDatabase(@"MyData.db"))
+                    {
+                        db.FileStorage.Upload(id.ToString(), "image" + id, stream);
+                        var records = db.GetCollection<Record>("records");
+                        records.FindById(id).HasImage = true;
+
+                    }
+                }
+            }
+
+            return Ok("Upload succeed");
+        }
+
+        // DELETE api/values/5
+        [HttpDelete]
+        [Route("image/{id}")]
+        public void DeleteImage(int id)
+        {
+            using (var db = new LiteDatabase(@"MyData.db"))
+            {
+                db.FileStorage.Delete(id.ToString());
+                var records = db.GetCollection<Record>("records");
+                records.FindOne(r => r.Id == id).HasImage = false;
+            }
+        }
+
+        //        // POST api/values
+        //        [HttpPost]
+        //        
+        //        public Task addImage(IFormFile file, int id)
+        //        {
+        ////            if (file == null || file.Length == 0)
+        ////                return Content("file not selected");
+        //
+        //            var pathTemp = Path.GetTempPath();
+        //
+        //            using (var stream = new FileStream(file.OpenReadStream(), FileMode.ReadOnly))
+        //            {
+        //                await file.CopyToAsync(stream);
+        //            }
+        //
+        //            using (var db = new LiteDatabase(@"MyData.db"))
+        //            {
+        //                var records = db.FileStorage.Upload(id.ToString(), file);
+        //            }
+        //
+        //            return CreatedAtRoute("GetRecordById", new { id = item.Id }, item);
+        //        }
+        //
+        //        [HttpPost]
+        //        public async Task<IActionResult> UploadFile(IFormFile file)
+        //        {
+        //            if (file == null || file.Length == 0)
+        //                return Content("file not selected");
+        //
+        //            var path = Path.Combine(
+        //                Directory.GetCurrentDirectory(), "wwwroot",
+        //                file.FileName);
+        //
+        //            using (var stream = new FileStream(path, FileMode.Create))
+        //            {
+        //                await file.CopyToAsync(stream);
+        //            }
+        //
+        //            return RedirectToAction("Files");
+        //        }
     }
 }
