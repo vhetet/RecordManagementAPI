@@ -15,8 +15,8 @@ namespace RecordManagementAPI.Model
         public DateTime BirthDate { get; set; }
         public String PhoneNumberProfessional { get; set; }
         public String PhoneNumberPersonal { get; set; }
-        public String Address { get; set; } // will need to improve the address to handle multiple string, should be it's own object
-                                            // need to add the image
+        public String Address { get; set; }
+        public bool HasImage { get; set; }
 
         public static void PopulateDB()
         {
