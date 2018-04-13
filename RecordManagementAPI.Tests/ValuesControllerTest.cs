@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LiteDB;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -41,19 +42,43 @@ namespace RecordManagementAPI.Tests
         }
 
         [TestMethod]
-        public void GetByEMail_invalidNumber_shouldReturnNull()
+        public void GetByEMail_invalidMail_shouldReturnNull()
         {
             var controller = new Controllers.ValuesController();
             var result = controller.GetByEMail("test");
-            Assert.AreEqual("null", result);
+            Assert.AreEqual("[]", result);
         }
 
         [TestMethod]
-        public void GetByEMail_validNumber_shouldReturnRecord()
+        public void GetByEMail_validMail_shouldReturnRecord()
         {
             var controller = new Controllers.ValuesController();
-            var result = JsonConvert.DeserializeObject<Record>(controller.GetByEMail("test.test@test.test"));
-            Assert.AreEqual("Test Tester", result.Name);
+            var result = JsonConvert.DeserializeObject<List<Record>>(controller.GetByEMail("test.test@test.test"));
+            Assert.AreEqual("Test Tester", result[0].Name);
+        }
+
+        [TestMethod]
+        public void GetByPhoneNumber_invalidNumber_shouldReturnNull()
+        {
+            var controller = new Controllers.ValuesController();
+            var result = controller.GetByPhoneNumber("3212");
+            Assert.AreEqual("[]", result);
+        }
+
+        [TestMethod]
+        public void GetByPhoneNumber_validPersonalNumber_shouldReturnRecord()
+        {
+            var controller = new Controllers.ValuesController();
+            var result = JsonConvert.DeserializeObject<List<Record>>(controller.GetByPhoneNumber("3123123123"));
+            Assert.AreEqual("Test Tester", result[0].Name);
+        }
+
+        [TestMethod]
+        public void GetByPhoneNumber_validProfessionalNumber_shouldReturnRecord()
+        {
+            var controller = new Controllers.ValuesController();
+            var result = JsonConvert.DeserializeObject<List<Record>>(controller.GetByPhoneNumber("3123123120"));
+            Assert.AreEqual("Test Tester", result[0].Name);
         }
     }
 }
