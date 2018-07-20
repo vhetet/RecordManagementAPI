@@ -298,6 +298,7 @@ __pycache__/
 
 # .NET Core
 **/Properties/launchSettings.json
+bin
 
 
 # Chutzpah Test files

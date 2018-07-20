@@ -24,8 +24,12 @@ namespace RecordManagementAPI.Tests
                 Address = "test"
             };
 
-            using (var db = new LiteDatabase(@"MyData.db"))
+            ConnectionString connectionString = new ConnectionString("MyData.db");
+            connectionString.Mode = FileMode.Exclusive;
+
+            using (var db = new LiteDatabase(connectionString))
             {
+                
                 var records = db.GetCollection<RecordManagementAPI.Model.Record>("records");
                 records.Insert(testRecord);
             }
@@ -34,8 +38,10 @@ namespace RecordManagementAPI.Tests
         [ClassCleanup]
         public static void ClassCleanUp()
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
-            {
+            ConnectionString connectionString = new ConnectionString("MyData.db");
+            connectionString.Mode = FileMode.Exclusive;
+
+            using (var db = new LiteDatabase(connectionString))            {
                 var records = db.GetCollection<Record>("records");
                 records.Delete(records.Max(r => r.Id));
             }

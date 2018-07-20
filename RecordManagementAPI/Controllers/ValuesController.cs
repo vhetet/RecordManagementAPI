@@ -12,11 +12,19 @@ namespace RecordManagementAPI.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        ConnectionString connectionString;
+
+        public ValuesController()
+        {
+            connectionString = new ConnectionString("MyData.db");
+            connectionString.Mode = LiteDB.FileMode.Exclusive;
+        }
+
         // GET api/values
         [HttpGet]
         public string Get()
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 var records = db.GetCollection<Record>("records");
                 return  JsonConvert.SerializeObject(records.FindAll());
@@ -29,7 +37,7 @@ namespace RecordManagementAPI.Controllers
         [HttpGet("{id}", Name = "GetRecordById")]
         public string Get(int id)
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 var records = db.GetCollection<Record>("records");
                 return JsonConvert.SerializeObject(records.FindById(id));
@@ -41,7 +49,7 @@ namespace RecordManagementAPI.Controllers
         [Route("phonenumber/{phoneNumber}")]
         public string GetByPhoneNumber(string phoneNumber)
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 var records = db.GetCollection<Record>("records");
                 return JsonConvert.SerializeObject(records.Find(x => x.PhoneNumberPersonal == phoneNumber || x.PhoneNumberProfessional == phoneNumber));
@@ -53,7 +61,7 @@ namespace RecordManagementAPI.Controllers
         [Route("email/{email}")]
         public string GetByEMail(string email)
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 var records = db.GetCollection<Record>("records");
                 return JsonConvert.SerializeObject(records.Find(x => x.Email == email));
@@ -67,7 +75,7 @@ namespace RecordManagementAPI.Controllers
             if (item == null)
                 return BadRequest();
             
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 var records = db.GetCollection<Record>("records");
                 records.Insert(item);
@@ -83,7 +91,7 @@ namespace RecordManagementAPI.Controllers
             if (item == null)
                 return BadRequest();
 
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 var records = db.GetCollection<Record>("records");
                 records.Update(item);
@@ -96,7 +104,7 @@ namespace RecordManagementAPI.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 var records = db.GetCollection<Record>("records");
                 db.FileStorage.Delete(id.ToString());
@@ -109,7 +117,7 @@ namespace RecordManagementAPI.Controllers
         [Route("image/{id}")]
         public IActionResult GetImage(string id)
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 if (!db.FileStorage.Exists(id))
                     return NotFound();
@@ -130,7 +138,8 @@ namespace RecordManagementAPI.Controllers
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
-                    using (var db = new LiteDatabase(@"MyData.db"))
+                    
+                    using (var db = new LiteDatabase(connectionString))
                     {
                         db.FileStorage.Upload(id.ToString(), "image" + id, stream);
                         var records = db.GetCollection<Record>("records");
@@ -148,7 +157,7 @@ namespace RecordManagementAPI.Controllers
         [Route("image/{id}")]
         public void DeleteImage(int id)
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
+            using (var db = new LiteDatabase(connectionString))
             {
                 db.FileStorage.Delete(id.ToString());
                 var records = db.GetCollection<Record>("records");

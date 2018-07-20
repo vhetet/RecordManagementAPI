@@ -17,8 +17,10 @@ namespace RecordManagementAPI.Model
 
         public static void PopulateDB()
         {
-            using (var db = new LiteDatabase(@"MyData.db"))
-            {
+            ConnectionString connectionString = new ConnectionString("MyData.db");
+            connectionString.Mode = FileMode.Exclusive;
+
+            using (var db = new LiteDatabase(connectionString)) {
                 var records = db.GetCollection<Record>("records");
 
                 Record testRecord1 = new Record()
